@@ -1,0 +1,4 @@
+set fwd rxonly
+show port info all
+show port stats all
+start

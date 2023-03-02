@@ -1,0 +1,87 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:openshift:scc:privileged-to-default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openshift:scc:privileged
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: default
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: testpmd-commands
+  namespace: default
+data:
+  commands.txt: |
+    set fwd rxonly
+    show port info all
+    show port stats all
+    start
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fedora-deployment
+  namespace: default
+  labels:
+    app: fedora-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fedora-pod
+  template:
+    metadata:
+      labels:
+        app: fedora-pod
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |-
+          [
+            {
+              "name": "vfio-pci-0-ns-default",
+              "mac": "20:04:0f:f1:88:01"
+            },
+            {
+              "name": "vfio-pci-0-ns-default",
+              "mac": "20:04:0f:f1:88:02"
+            }
+          ]
+    spec:
+      containers:
+      - name: sample-container
+        image: quay.io/akaris/testpmd:latest
+        imagePullPolicy: IfNotPresent
+        # command: ["sleep", "infinity"]
+        securityContext:
+          runAsUser: 0
+          capabilities:
+            add:
+              - "CAP_NET_RAW"
+              - "CAP_NET_ADMIN"
+              - "IPC_LOCK"
+              - "SYS_RESOURCE"
+        volumeMounts:
+        - mountPath: /hugepages-1Gi
+          name: hugepage-1gi
+        - mountPath: /testpmd
+          name: testpmd-commands
+        resources:
+          limits:
+            hugepages-1Gi: 6Gi
+            memory: 100Mi
+            cpu: "8"
+          requests:
+            memory: 100Mi
+            cpu: "8"
+      volumes:
+      - name: hugepage-1gi
+        emptyDir:
+          medium: HugePages-1Gi
+      - name: testpmd-commands
+        configMap:
+          name: testpmd-commands
