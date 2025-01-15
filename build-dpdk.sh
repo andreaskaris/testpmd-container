@@ -20,9 +20,9 @@ tar -xf dpdk.tar.xz
 rm -f dpdk.tar.xz
 mv dpdk* dpdk
 cd dpdk
-meson -Dplatform=generic build
+meson -Dplatform=generic --buildtype=debug --optimization 0 build
 cd build
-meson configure -Dexamples=all
+meson configure --buildtype=debug --optimization 0 -Dexamples=all
 ninja
 cd "${SCRIPT_DIR}/build-dir"
 cp dpdk/build/app/dpdk-testpmd .

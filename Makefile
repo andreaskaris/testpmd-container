@@ -17,3 +17,15 @@ push-container: ## Push the container. CONTAINER_RUNTIME and IMAGE to override d
 .PHONY: help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+.PHONY: deploy
+deploy: ## Deploy kubernetes resources.
+	kubectl apply -f testpmd-pod.yaml
+
+.PHONY: undeploy
+undeploy: ## Undeploy kubernetes resources.
+	kubectl delete -f testpmd-pod.yaml
+
+.PHONY: apply-runtime
+apply-runtime: ## Apply runtime changes for rootless DPDK.
+	kubectl apply -f runtime.yaml

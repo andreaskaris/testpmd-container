@@ -7,7 +7,7 @@ set -eu
 
 echo "Get PCI_DEVICE_ID from filter expression"
 PCI_DEVICE_FILTER=${PCI_DEVICE_FILTER:-PCIDEVICE_OPENSHIFT_IO}
-PCI_DEVICE_IDS=$(env | grep -E "^$PCI_DEVICE_FILTER" | awk -F '=' '{print $NF}' | head -1 | sed 's/,/ /g') 
+PCI_DEVICE_IDS=$(env | grep -E "^$PCI_DEVICE_FILTER" | awk -F '=' '{print $NF}' | sort | head -1 | sed 's/,/ /g')
 PCI_DEVICE_ALLOW_LIST=""
 for pci_device_id in ${PCI_DEVICE_IDS}; do
   PCI_DEVICE_ALLOW_LIST="${PCI_DEVICE_ALLOW_LIST} -a ${pci_device_id}"
