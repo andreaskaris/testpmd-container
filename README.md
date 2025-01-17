@@ -1,4 +1,4 @@
-## Rotoless dpdk-testpmd on OpenShift
+## Rootless dpdk-testpmd on OpenShift
 
 ### How to run
 
@@ -148,6 +148,9 @@ spec:
    ]
  }'
 ```
+
+In the above NetworkAttachmentDefinition for the tap, you must set the selinuxcontext, the mac capabilities, as well as assign an IP address to the interface. Because the pod is run as non-root, this is the only way to assign an IP address to the kernel tap interface.
+
 
 #### Deployment
 
