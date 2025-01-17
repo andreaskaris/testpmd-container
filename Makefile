@@ -94,3 +94,5 @@ undeploy-testpmd-tap: ## Undeploy testpmd-tap resources.
 	make kustomize-testpmd-tap | oc delete -f -
 	make kustomize-prerequisites | oc delete -f -
 
+embed-readme:
+	embedmd -w README.md
