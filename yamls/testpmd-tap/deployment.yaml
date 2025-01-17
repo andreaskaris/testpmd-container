@@ -1,0 +1,82 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fedora-deployment
+  namespace: dpdktest
+  labels:
+    app: fedora-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fedora-pod
+  template:
+    metadata:
+      labels:
+        app: fedora-pod
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |-
+          [
+            {
+              "name": "vfio-pci-0-ns-dpdktest",
+              "mac": "20:04:0f:f1:88:01"
+            },
+            {
+              "name": "tap-one",
+              "interface": "dp0",
+              "mac": "20:04:0f:f1:88:01"
+            }
+          ]
+    spec:
+      securityContext:
+        fsGroup: $FS_GROUP    # must be set as this sets the group ownership of all volume mounts, including hugepages
+        runAsGroup: $RUN_AS_GROUP # set the group of the container user - need not match fsGroup
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: dpdktest
+      containers:
+      - name: sample-container
+        image: quay.io/akaris/testpmd:latest
+        env:
+          - name: PCI_DEVICE_FILTER
+            value: "PCIDEVICE_OPENSHIFT_IO"
+          - name: TAP_INTERFACE
+            value: "dp0"  # set this to overrirde the tap name
+          - name: PINNED_LCORES
+            value: ""  # set this to override lcores of dpdk-testpmd process. Otherwise, all CPUs will be chosen from cgroup's allowed cpu list
+        imagePullPolicy: IfNotPresent
+        tty: true # To get correct output from testpmd.
+        command:
+          - "/bin/bash"
+          - "/testpmd/entrypoint.sh"
+        securityContext:
+          runAsNonRoot: $RUN_AS_NON_ROOT
+          runAsUser: $RUN_AS_USER
+          capabilities:
+            add:
+              - "IPC_LOCK"      # required
+              - "SYS_RESOURCE"  # required
+          privileged: false
+          allowPrivilegeEscalation: false
+        volumeMounts:
+        - mountPath: /hugepages-1Gi
+          name: hugepage-1gi
+        - mountPath: /testpmd
+          name: testpmd-commands
+        resources:
+          limits:
+            hugepages-1Gi: 6Gi
+            memory: 100Mi
+            cpu: "8"
+          requests:
+            memory: 100Mi
+            cpu: "8"
+      volumes:
+      - name: hugepage-1gi
+        emptyDir:
+          medium: HugePages-1Gi
+      - name: testpmd-commands
+        configMap:
+          name: testpmd-commands
+      runtimeClassName: "performance-sno-pp"  # set this to: oc get runtimeclass

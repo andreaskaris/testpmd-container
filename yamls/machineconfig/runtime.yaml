@@ -1,3 +1,5 @@
+# Prerequisite for rootless DPDK, uses to make capabilities inheritable.
+# For example, required for cases where DPDK is run by a wrapper script.
 apiVersion: machineconfiguration.openshift.io/v1
 kind: MachineConfig
 metadata:

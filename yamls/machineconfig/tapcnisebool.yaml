@@ -1,0 +1,28 @@
+# Prerequisite for tap interaces for rootless DPDK.
+# https://docs.openshift.com/container-platform/4.14/networking/multiple_networks/configuring-additional-network.html#nw-multus-enable-container_use_devices_configuring-additional-network
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: master
+  name: 99-master-setsebool
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    systemd:
+      units:
+      - enabled: true
+        name: setsebool.service
+        contents: |
+          [Unit]
+          Description=Set SELinux boolean for the TAP CNI plugin
+          Before=kubelet.service
+
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/sbin/setsebool container_use_devices=on
+          RemainAfterExit=true
+
+          [Install]
+          WantedBy=multi-user.target graphical.target

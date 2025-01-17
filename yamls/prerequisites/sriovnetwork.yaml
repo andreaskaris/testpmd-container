@@ -1,0 +1,9 @@
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetwork
+metadata:
+  name: vfio-pci-0-ns-dpdktest
+  namespace: openshift-sriov-network-operator
+spec:
+  logLevel: info
+  networkNamespace: dpdktest
+  resourceName: vfio_pci_0
