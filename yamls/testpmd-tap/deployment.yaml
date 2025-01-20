@@ -57,8 +57,8 @@ spec:
             add:
               - "IPC_LOCK"      # required
               - "SYS_RESOURCE"  # required
-          privileged: false
-          allowPrivilegeEscalation: false
+          privileged: $PRIVILEGED
+          allowPrivilegeEscalation: $ALLOW_PRIVILEGE_ESCALATION
         volumeMounts:
         - mountPath: /hugepages-1Gi
           name: hugepage-1gi
@@ -67,10 +67,11 @@ spec:
         resources:
           limits:
             hugepages-1Gi: 6Gi
-            memory: 100Mi
+            memory: 1Gi
             cpu: "8"
           requests:
-            memory: 100Mi
+            hugepages-1Gi: 6Gi
+            memory: 1Gi
             cpu: "8"
       volumes:
       - name: hugepage-1gi

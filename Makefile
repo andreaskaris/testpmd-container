@@ -45,6 +45,13 @@ kustomize-testpmd-portforwarder: export RUN_AS_USER = 1001
 kustomize-testpmd-portforwarder: export RUN_AS_GROUP = 2001
 kustomize-testpmd-portforwarder: export FS_GROUP = 2002
 endif
+ifeq ($(PRIVILEGED), true)
+kustomize-testpmd-portforwarder: export PRIVILEGED = true
+kustomize-testpmd-tap: export ALLOW_PRIVILEGE_ESCALATION = true
+else
+kustomize-testpmd-portforwarder: export PRIVILEGED = false
+kustomize-testpmd-tap: export ALLOW_PRIVILEGE_ESCALATION = false
+endif
 kustomize-testpmd-portforwarder:
 	@cat yamls/testpmd-portforwarder/configmap.yaml
 	@cat yamls/testpmd-portforwarder/deployment.yaml | envsubst
@@ -60,6 +67,13 @@ kustomize-testpmd-tap: export RUN_AS_NON_ROOT = true
 kustomize-testpmd-tap: export RUN_AS_USER = 1001
 kustomize-testpmd-tap: export RUN_AS_GROUP = 2001
 kustomize-testpmd-tap: export FS_GROUP = 2002
+endif
+ifeq ($(PRIVILEGED), true)
+kustomize-testpmd-tap: export PRIVILEGED = true
+kustomize-testpmd-tap: export ALLOW_PRIVILEGE_ESCALATION = true
+else
+kustomize-testpmd-tap: export PRIVILEGED = false
+kustomize-testpmd-tap: export ALLOW_PRIVILEGE_ESCALATION = false
 endif
 kustomize-testpmd-tap:
 	@cat yamls/testpmd-tap/tap.yaml

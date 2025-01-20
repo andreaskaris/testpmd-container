@@ -31,6 +31,20 @@ spec:
           path: /etc/crio/crio.conf.d/10-custom
 ```
 
+* Reserve CPU, memory and hugepages via requests/limits
+
+```
+         resources:                                                                                                      
+           limits:                                                                                                       
+             hugepages-1Gi: 6Gi                                                                                          
+             memory: 1Gi                                                                                                 
+             cpu: "8"                                                                                                    
+           requests:                                                                                                     
+             hugepages-1Gi: 6Gi                                                                                          
+             memory: 1Gi                                                                                                 
+             cpu: "8"
+```
+
 #### For rootless KNI vhost tap interface
 
 * Enable SELinux bool for tap interface:
@@ -151,6 +165,12 @@ In the above NetworkAttachmentDefinition for the tap, you must set the selinuxco
 
 ### Deployment
 
+First, deploy the MachineConfig prerequisites:
+
+```
+make deploy-machineconfig
+```
+
 In order to deploy the port-forwarder which forwards between 2 VFs, run:
 
 ```
@@ -164,7 +184,7 @@ the virtio driver to the TAP, run:
 make deploy-testpmd-tap
 ```
 
-> In both of the above cases, add `ROOT=true` to run with root privileges (e.g. for testing).
+> In both of the above cases, add `ROOT=true` to run with root privileges or PRIVILEGED=true to run a privileged pod (e.g. for testing).
 
 Change the following values (and possibly others) according to your environment, otherwise use the same names:
 
