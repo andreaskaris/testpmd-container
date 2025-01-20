@@ -466,3 +466,9 @@ PING 192.168.18.1 (192.168.18.1) 56(84) bytes of data.
 rtt min/avg/max/mdev = 0.258/0.379/0.501/0.121 ms
 sh-5.2$ 
 ```
+
+### Caveats
+
+The testpmd-tap pod can only ping its destination when the other side runs a ping to it, first.
+I suspect that this is a problem with my testpmd configuration. ARP resolution works fine in
+both directions but `arping` from the target host does not solve this issue. 
