@@ -21,7 +21,7 @@ fi
 rm -Rf "${SCRIPT_DIR}/build-dir"
 mkdir -p "${SCRIPT_DIR}/build-dir"
 cd "${SCRIPT_DIR}/build-dir"
-curl -o dpdk.tar.xz https://fast.dpdk.org/rel/dpdk-22.11.1.tar.xz
+curl -o dpdk.tar.xz https://fast.dpdk.org/rel/dpdk-23.11.4.tar.xz
 tar -xf dpdk.tar.xz
 rm -f dpdk.tar.xz
 mv dpdk* dpdk
