@@ -37,7 +37,7 @@ spec:
       serviceAccountName: dpdktest
       containers:
       - name: sample-container
-        image: quay.io/akaris/testpmd:latest
+        image: $IMAGE
         env:
           - name: PCI_DEVICE_FILTER
             value: "PCIDEVICE_OPENSHIFT_IO"

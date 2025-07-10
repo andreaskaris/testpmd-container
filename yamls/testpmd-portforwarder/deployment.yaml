@@ -36,7 +36,7 @@ spec:
       serviceAccountName: dpdktest
       containers:
       - name: sample-container
-        image: quay.io/akaris/testpmd:latest
+        image: $IMAGE
         imagePullPolicy: IfNotPresent
         # command: ["sleep", "infinity"]
         command:

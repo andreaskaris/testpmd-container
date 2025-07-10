@@ -47,11 +47,12 @@ kustomize-testpmd-portforwarder: export FS_GROUP = 2002
 endif
 ifeq ($(PRIVILEGED), true)
 kustomize-testpmd-portforwarder: export PRIVILEGED = true
-kustomize-testpmd-tap: export ALLOW_PRIVILEGE_ESCALATION = true
+kustomize-testpmd-portforwarder: export ALLOW_PRIVILEGE_ESCALATION = true
 else
 kustomize-testpmd-portforwarder: export PRIVILEGED = false
-kustomize-testpmd-tap: export ALLOW_PRIVILEGE_ESCALATION = false
+kustomize-testpmd-portforwarder: export ALLOW_PRIVILEGE_ESCALATION = false
 endif
+kustomize-testpmd-portforwarder: export IMAGE=$(IMAGE)
 kustomize-testpmd-portforwarder:
 	@cat yamls/testpmd-portforwarder/configmap.yaml
 	@cat yamls/testpmd-portforwarder/deployment.yaml | envsubst
@@ -75,6 +76,7 @@ else
 kustomize-testpmd-tap: export PRIVILEGED = false
 kustomize-testpmd-tap: export ALLOW_PRIVILEGE_ESCALATION = false
 endif
+kustomize-testpmd-tap: export IMAGE=$(IMAGE)
 kustomize-testpmd-tap:
 	@cat yamls/testpmd-tap/tap.yaml
 	@cat yamls/testpmd-tap/configmap.yaml
