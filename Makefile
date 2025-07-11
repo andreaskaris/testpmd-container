@@ -76,7 +76,7 @@ else
 kustomize-testpmd-tap: export PRIVILEGED = false
 kustomize-testpmd-tap: export ALLOW_PRIVILEGE_ESCALATION = false
 endif
-kustomize-testpmd-tap: export IMAGE=$(IMAGE)
+kustomize-testpmd-tap: export CONTAINER_IMAGE=$(IMAGE)
 kustomize-testpmd-tap:
 	@cat yamls/testpmd-tap/tap.yaml
 	@cat yamls/testpmd-tap/configmap.yaml

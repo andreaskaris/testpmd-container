@@ -163,6 +163,67 @@ spec:
 
 In the above NetworkAttachmentDefinition for the tap, you must set the selinuxcontext, the mac capabilities, as well as assign an IP address to the interface. Because the pod is run as non-root, this is the only way to assign an IP address to the kernel tap interface.
 
+##### Overriding the MAC address
+
+DPDK uses the the ioctl systemcall with the SIOCSIFHWADDR op to change the interface MAC address. This operation does
+not need NET_ADMIN privileges. Therefore, if you want to set a different MAC address via DPDK than the one that was
+assigned to the TAP interface by the net-attach-def, you can do this if the following prerequisites are fulfilled.
+
+First, update `yamls/prerequisites/sriovnetwork.yaml` and enable trust and disable spoof checking for the VF:
+
+```
+@@ -7,3 +7,5 @@ spec:
+   logLevel: info
+   networkNamespace: dpdktest
+   resourceName: vfio_pci_0
++  spoofChk: "off"
++  trust: "on"
+```
+
+Then, update the `dpdk-testpmd` command and set the interface MAC address with `mac=${MACADDR}`. For example, here's a diff
+with the changes that I made:
+
+```
+diff --git a/yamls/testpmd-tap/configmap.yaml b/yamls/testpmd-tap/configmap.yaml
+index e824860..22d58e0 100644
+--- a/yamls/testpmd-tap/configmap.yaml
++++ b/yamls/testpmd-tap/configmap.yaml
+@@ -34,6 +34,8 @@ data:
+         echo "Mac addresses of PCI device $PCI_DEVICE_ID and of tap interface $TAP_INTERFACE do not match"
+         exit 1
+     fi
++    MAC_DPDK_OVERRIDE="${MAC_DPDK_OVERRIDE:-$TAP_MACADDR}"
+     
+     if [ "$PINNED_LCORES" == "" ]; then
+        echo "Get available CPUs from the Cpus_allowed: list"
+@@ -45,8 +47,9 @@ data:
+     
+     echo "Run testpmd and forward everything between dp0 tunnel interface and vfio interface"
+     ( while true ; do echo 'show port stats all' ; sleep 60 ; done ) | \
++        strace -f -tt -o /tmp/strace.txt -s1024 \
+         dpdk-testpmd --log-level=10 --legacy-mem \
+-        --vdev=virtio_user0,path=/dev/vhost-net,queues=2,queue_size=1024,iface=${TAP_INTERFACE},mac=${MACADDR} \
++        --vdev=virtio_user0,path=/dev/vhost-net,queues=2,queue_size=1024,iface=${TAP_INTERFACE},mac=${MAC_DPDK_OVERRIDE} \
+         -l $PINNED_LCORES -n 4 -a $PCI_DEVICE_ID -- \
+         --nb-cores=1 --nb-ports=2  --total-num-mbufs=2048 -i --cmdline-file=/testpmd/commands.txt
+       
+diff --git a/yamls/testpmd-tap/deployment.yaml b/yamls/testpmd-tap/deployment.yaml
+index 31f30e9..5c11c0e 100644
+--- a/yamls/testpmd-tap/deployment.yaml
++++ b/yamls/testpmd-tap/deployment.yaml
+@@ -43,6 +43,8 @@ spec:
+             value: "PCIDEVICE_OPENSHIFT_IO"
+           - name: TAP_INTERFACE
+             value: "dp0"  # set this to overrirde the tap name
++          - name: MAC_DPDK_OVERRIDE
++            value: "20:04:0f:f1:88:02"
+           - name: PINNED_LCORES
+             value: ""  # set this to override lcores of dpdk-testpmd process. Otherwise, all CPUs will be chosen from cgroup's allowed cpu list
+         imagePullPolicy: IfNotPresent
+```
+
+I documented the reason why this works in https://andreaskaris.github.io/blog/linux/set-tun-mac-privileges/.
+
 ### Deployment
 
 First, deploy the MachineConfig prerequisites:

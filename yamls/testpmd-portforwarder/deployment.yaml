@@ -36,7 +36,7 @@ spec:
       serviceAccountName: dpdktest
       containers:
       - name: sample-container
-        image: $IMAGE
+        image: $CONTAINER_IMAGE
         imagePullPolicy: IfNotPresent
         # command: ["sleep", "infinity"]
         command:
